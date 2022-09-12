@@ -11,7 +11,7 @@ const alchemyConnectionSettings = {
 };
 const alchemy = new Alchemy(alchemyConnectionSettings);
 
-async function populateContractMintHistory(contractAddress: string, contractAlias: string | null = null) {
+async function populateContractMintHistory(contractAddress: string, contractAlias: string) {
     // create params to limit the results of the alchemy.core.getAssetTransfers api
     // NFTs are always transfered from the zero address when first minted
     // We only want ERC721 and ERC1155 transfers
@@ -45,15 +45,16 @@ async function getContractMintHistoryResults(assetTransfersParams: AssetTransfer
     return await alchemy.core.getAssetTransfers(assetTransfersParams);
 }
 
-function gatherMintHistory(results: AssetTransfersResponse, mints: Array<MintHistory>, contractAddress: string, contractAlias: string | null) {
+function gatherMintHistory(results: AssetTransfersResponse, mints: Array<MintHistory>, contractAddress: string, contractAlias: string) {
     results.transfers.forEach((transfer) => {
         mints.push(
             {
                 id: null,
-                wallet_address: transfer.to,
+                wallet_address: transfer.to!,
                 contract_address: contractAddress,
                 contract_alias: contractAlias,
-                token_id: BigNumber.from(transfer.tokenId).toNumber()
+                token_id: BigNumber.from(transfer.tokenId).toNumber(),
+                txn_hash: transfer.hash
             }
         )
     })
